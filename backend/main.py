@@ -1,0 +1,86 @@
+from fastapi import FastAPI, HTTPException, WebSocket, Depends
+from fastapi.middleware.cors import CORSMiddleware
+from database import supabase
+from models import Venue, Zone, BookingCreate, Booking
+from typing import List
+import asyncio
+import random
+
+app = FastAPI(title="FlowScape MVP API")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.get("/")
+def read_root():
+    return {"message": "Welcome to FlowScape MVP API"}
+
+@app.get("/venues", response_model=List[Venue])
+def get_venues():
+    response = supabase.table("venues").select("*").execute()
+    return response.data
+
+@app.get("/venues/{venue_id}/zones", response_model=List[Zone])
+def get_zones(venue_id: str):
+    response = supabase.table("zones").select("*").eq("venue_id", venue_id).execute()
+    return response.data
+
+@app.post("/bookings", response_model=Booking)
+def create_booking(booking: BookingCreate, user_id: str = "mock-user-uuid"):
+    # In a real app, user_id comes from Auth token
+    data = {
+        "user_id": user_id,
+        "venue_id": str(booking.venue_id),
+        "start_time": booking.start_time.isoformat(),
+        "end_time": booking.end_time.isoformat(),
+        "status": "CONFIRMED"
+    }
+    response = supabase.table("bookings").insert(data).execute()
+    if not response.data:
+        raise HTTPException(status_code=400, detail="Booking failed")
+    return response.data[0]
+
+# WebSockets for Heatmaps
+@app.websocket("/ws/heatmaps")
+async def websocket_heatmaps(websocket: WebSocket):
+    await websocket.accept()
+    try:
+        while True:
+            # Fetch the latest simulated density logs or just broadcast randomly for testing
+            # For MVP demo, we will push random updates if DB is empty
+            response = supabase.table("zones").select("id").execute()
+            zones = response.data
+            
+            updates = []
+            for zone in zones:
+                status = random.choice(["GREEN", "YELLOW", "RED"])
+                updates.append({"zone_id": zone["id"], "status": status})
+                
+            await websocket.send_json({"type": "DENSITY_UPDATE", "data": updates})
+            await asyncio.sleep(5) # Push every 5 seconds
+    except Exception as e:
+        print(f"WebSocket Error: {e}")
+
+# WebSockets for Alerts
+active_alert_connections = []
+
+@app.websocket("/ws/alerts")
+async def websocket_alerts(websocket: WebSocket):
+    await websocket.accept()
+    active_alert_connections.append(websocket)
+    try:
+        while True:
+            await websocket.receive_text() # Keep connection open
+    except:
+        active_alert_connections.remove(websocket)
+
+@app.post("/admin/broadcast")
+async def broadcast_alert(message: str):
+    for connection in active_alert_connections:
+        await connection.send_json({"type": "ALERT", "message": message})
+    return {"message": "Alert broadcasted"}
