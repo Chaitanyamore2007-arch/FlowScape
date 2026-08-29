@@ -6,6 +6,12 @@ import { supabase } from './supabase';
 import Map, { Source, Layer, NavigationControl, GeolocateControl, FullscreenControl, ScaleControl } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
+if (Platform.OS === 'web') {
+  const style = document.createElement('style');
+  style.textContent = `html, body, #root { height: 100%; width: 100%; overflow: hidden; margin: 0; }`;
+  document.head.appendChild(style);
+}
+
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiY2hhaXRhbnlhbW9yZSIsImEiOiJjbXQ5dmRyYjgwNHhuMnlzMXRiNzI5Z2JxIn0.ZuMDWt7m5FkbIJNVcdm7MA';
 
 export default function App() {
