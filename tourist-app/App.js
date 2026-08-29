@@ -159,54 +159,62 @@ function MainApp({ session }) {
         setSelectedLocation(prev => prev === 'Detecting nearest location...' ? 'Central Park (Nearest Node)' : prev);
     }, 2000);
 
-    heatmapsWs.current = new WebSocket('wss://flowscape.onrender.com/ws/heatmaps');
-    heatmapsWs.current.onmessage = (event) => {
-      const msg = JSON.parse(event.data);
-      if (msg.type === 'DENSITY_UPDATE') {
-        const updates = msg.data;
-        const hasRedZone = updates.some(u => u.status === 'RED');
-        
-        // Build GeoJSON for the Map
-        const geojson = {
-          type: 'FeatureCollection',
-          features: updates.map(u => ({
-             type: 'Feature',
-             properties: { status: u.status },
-             geometry: {
-                 type: 'Polygon',
-                 coordinates: [u.zone_id.includes('b3') ? 
-                   [[-73.978, 40.753], [-73.976, 40.753], [-73.976, 40.751], [-73.978, 40.751], [-73.978, 40.753]] 
-                   :
-                   [[-73.976, 40.755], [-73.974, 40.755], [-73.974, 40.753], [-73.976, 40.753], [-73.976, 40.755]] 
-                 ]
-             }
-          }))
-        };
-        setHeatData(geojson);
-
-        if (hasRedZone) {
-          setCapacity(88);
-          setCapacityStatus('High');
-          setIncentive('Peak hours detected! Shift your departure time to avoid crowds and save.');
-          setDiscount(15);
-        } else {
-          setCapacity(45);
-          setCapacityStatus('Moderate');
-          setIncentive('Standard booking available.');
-          setDiscount(0);
+    const connectHeatmaps = () => {
+      heatmapsWs.current = new WebSocket('wss://flowscape.onrender.com/ws/heatmaps');
+      heatmapsWs.current.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.type === 'DENSITY_UPDATE') {
+          const updates = msg.data;
+          const hasRedZone = updates.some(u => u.status === 'RED');
+          
+          const geojson = {
+            type: 'FeatureCollection',
+            features: updates.map(u => ({
+               type: 'Feature',
+               properties: { status: u.status },
+               geometry: {
+                   type: 'Polygon',
+                   coordinates: [u.zone_id.includes('b3') ? 
+                     [[-73.978, 40.753], [-73.976, 40.753], [-73.976, 40.751], [-73.978, 40.751], [-73.978, 40.753]] 
+                     :
+                     [[-73.976, 40.755], [-73.974, 40.755], [-73.974, 40.753], [-73.976, 40.753], [-73.976, 40.755]] 
+                   ]
+               }
+            }))
+          };
+          setHeatData(geojson);
+  
+          if (hasRedZone) {
+            setCapacity(88);
+            setCapacityStatus('High');
+            setIncentive('Peak hours detected! Shift your departure time to avoid crowds and save.');
+            setDiscount(15);
+          } else {
+            setCapacity(45);
+            setCapacityStatus('Moderate');
+            setIncentive('Standard booking available.');
+            setDiscount(0);
+          }
         }
-      }
+      };
+      heatmapsWs.current.onclose = () => setTimeout(connectHeatmaps, 3000);
     };
 
-    alertsWs.current = new WebSocket('wss://flowscape.onrender.com/ws/alerts');
-    alertsWs.current.onmessage = (event) => {
-      const msg = JSON.parse(event.data);
-      if (msg.type === 'ALERT') {
-        setLiveAlerts(prev => [{ id: Date.now(), message: msg.message, time: 'Just now' }, ...prev]);
-        if (Platform.OS === 'web') window.alert("Emergency Broadcast\n\n" + msg.message);
-        else Alert.alert("Emergency Broadcast", msg.message);
-      }
+    const connectAlerts = () => {
+      alertsWs.current = new WebSocket('wss://flowscape.onrender.com/ws/alerts');
+      alertsWs.current.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.type === 'ALERT') {
+          setLiveAlerts(prev => [{ id: Date.now(), message: msg.message, time: 'Just now' }, ...prev]);
+          if (Platform.OS === 'web') window.alert("Emergency Broadcast\n\n" + msg.message);
+          else Alert.alert("Emergency Broadcast", msg.message);
+        }
+      };
+      alertsWs.current.onclose = () => setTimeout(connectAlerts, 3000);
     };
+
+    connectHeatmaps();
+    connectAlerts();
 
     return () => {
       if (heatmapsWs.current) heatmapsWs.current.close();
