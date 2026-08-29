@@ -46,19 +46,43 @@ def create_booking(booking: BookingCreate, user_id: str = "mock-user-uuid"):
     return response.data[0]
 
 # WebSockets for Heatmaps
+import joblib
+import datetime
+import pandas as pd
+
+try:
+    rf_model = joblib.load("density_model.joblib")
+    print("Successfully loaded Random Forest Model!")
+except Exception as e:
+    rf_model = None
+    print("Warning: Could not load ML model, falling back to random:", e)
+
 @app.websocket("/ws/heatmaps")
 async def websocket_heatmaps(websocket: WebSocket):
     await websocket.accept()
     try:
         while True:
-            # Fetch the latest simulated density logs or just broadcast randomly for testing
-            # For MVP demo, we will push random updates if DB is empty
+            # Fetch zones from Supabase
             response = supabase.table("zones").select("id").execute()
             zones = response.data
             
             updates = []
+            now = datetime.datetime.now()
+            
             for zone in zones:
-                status = random.choice(["GREEN", "YELLOW", "RED"])
+                if rf_model:
+                    # Feed real-time live variables into the Random Forest
+                    # (time, day, holiday status, and varied temperature per zone)
+                    input_df = pd.DataFrame([{
+                        'time_of_day': now.hour,
+                        'day_of_week': now.weekday(),
+                        'is_holiday': 0, # Could be hooked up to a holiday API
+                        'weather_temp': 32 + random.randint(-3, 3) 
+                    }])
+                    status = rf_model.predict(input_df)[0]
+                else:
+                    status = random.choice(["GREEN", "YELLOW", "RED"])
+                    
                 updates.append({"zone_id": zone["id"], "status": status})
                 
             await websocket.send_json({"type": "DENSITY_UPDATE", "data": updates})

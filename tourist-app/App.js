@@ -153,7 +153,7 @@ function MainApp({ session }) {
         setSelectedLocation(prev => prev === 'Detecting nearest location...' ? 'Central Park (Nearest Node)' : prev);
     }, 2000);
 
-    heatmapsWs.current = new WebSocket('wss://changelog-seating-groundwater-horses.trycloudflare.com/ws/heatmaps');
+    heatmapsWs.current = new WebSocket('wss://remains-science-served-back.trycloudflare.com/ws/heatmaps');
     heatmapsWs.current.onmessage = (event) => {
       const msg = JSON.parse(event.data);
       if (msg.type === 'DENSITY_UPDATE') {
@@ -192,7 +192,7 @@ function MainApp({ session }) {
       }
     };
 
-    alertsWs.current = new WebSocket('wss://changelog-seating-groundwater-horses.trycloudflare.com/ws/alerts');
+    alertsWs.current = new WebSocket('wss://remains-science-served-back.trycloudflare.com/ws/alerts');
     alertsWs.current.onmessage = (event) => {
       const msg = JSON.parse(event.data);
       if (msg.type === 'ALERT') {
@@ -210,7 +210,7 @@ function MainApp({ session }) {
 
   const handleBooking = async () => {
     try {
-        const response = await fetch('https://changelog-seating-groundwater-horses.trycloudflare.com/bookings?user_id=' + session.user.id, {
+        const response = await fetch('https://remains-science-served-back.trycloudflare.com/bookings?user_id=' + session.user.id, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

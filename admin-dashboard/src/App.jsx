@@ -25,7 +25,7 @@ function App() {
   const ws = useRef(null)
 
   useEffect(() => {
-    ws.current = new WebSocket('wss://changelog-seating-groundwater-horses.trycloudflare.com/ws/heatmaps')
+    ws.current = new WebSocket('wss://remains-science-served-back.trycloudflare.com/ws/heatmaps')
     ws.current.onmessage = (event) => {
       const msg = JSON.parse(event.data)
       if (msg.type === 'DENSITY_UPDATE') {
@@ -48,7 +48,7 @@ function App() {
   const sendAlert = async () => {
     if (!alertMsg) return
     try {
-        const response = await fetch('https://changelog-seating-groundwater-horses.trycloudflare.com/admin/broadcast?message=' + encodeURIComponent(alertMsg), { method: 'POST' })
+        const response = await fetch('https://remains-science-served-back.trycloudflare.com/admin/broadcast?message=' + encodeURIComponent(alertMsg), { method: 'POST' })
         if(response.ok) {
             setBroadcastStatus('Alert broadcasted successfully!')
             setAlertMsg('')
