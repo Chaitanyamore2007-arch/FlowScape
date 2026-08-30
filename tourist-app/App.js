@@ -66,7 +66,7 @@ function AuthScreen({ setSession }) {
     <SafeAreaView style={styles.container}>
         <View style={{flex:1, justifyContent: 'center', padding: 20}}>
             <Text style={{fontSize: 32, fontWeight: 'bold', color: '#00497d', textAlign: 'center', marginBottom: 10}}>FlowScape</Text>
-            <Text style={{fontSize: 16, color: '#414750', textAlign: 'center', marginBottom: 40}}>Smart Routing & Gamification</Text>
+            <Text style={{fontSize: 16, color: '#414750', textAlign: 'center', marginBottom: 40}}>Live Heatmaps & Gamified Smart Routing for Heritage Tourism in Pune.</Text>
             
             <View style={{backgroundColor: '#ffffff', padding: 20, borderRadius: 12, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 4, elevation: 2}}>
                 <Text style={{fontSize: 20, fontWeight: 'bold', color: '#191c20', marginBottom: 20}}>Sign In / Sign Up</Text>
@@ -156,7 +156,7 @@ function MainApp({ session }) {
   useEffect(() => {
     // Simulate GPS Nearest Node Detection
     const gpsTimer = setTimeout(() => {
-        setSelectedLocation(prev => prev === 'Detecting nearest location...' ? 'Central Park (Nearest Node)' : prev);
+        setSelectedLocation(prev => prev === 'Detecting nearest location...' ? 'Shaniwar Wada (Live Status)' : prev);
     }, 2000);
 
     const connectHeatmaps = () => {
@@ -167,18 +167,22 @@ function MainApp({ session }) {
           const updates = msg.data;
           const hasRedZone = updates.some(u => u.status === 'RED');
           
+          // Simulated Pune Tourist Sites Heatmap
+          const siteCoordinates = [
+            [73.8553, 18.5195], // Shaniwar Wada
+            [73.8500, 18.5266], // Pataleshwar
+            [73.9015, 18.5523], // Aga Khan Palace
+            [73.8430, 18.5080], // Saras Baug
+            [73.8640, 18.5230]  // Dagdusheth
+          ];
           const geojson = {
             type: 'FeatureCollection',
-            features: updates.map(u => ({
+            features: updates.slice(0, 5).map((u, i) => ({
                type: 'Feature',
-               properties: { status: u.status },
+               properties: { status: i === 0 ? 'RED' : i === 1 ? 'YELLOW' : 'GREEN' }, // Force distinct colors for demo
                geometry: {
-                   type: 'Polygon',
-                   coordinates: [u.zone_id.includes('b3') ? 
-                     [[-73.978, 40.753], [-73.976, 40.753], [-73.976, 40.751], [-73.978, 40.751], [-73.978, 40.753]] 
-                     :
-                     [[-73.976, 40.755], [-73.974, 40.755], [-73.974, 40.753], [-73.976, 40.753], [-73.976, 40.755]] 
-                   ]
+                   type: 'Point',
+                   coordinates: siteCoordinates[i % siteCoordinates.length]
                }
             }))
           };
@@ -377,7 +381,7 @@ function MainApp({ session }) {
              
              <View style={styles.pathCard}>
                 <ImageBackground 
-                    source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAu8mUYCdw07aLb67otx-71V-TVddS3D8H1YXVQUxIj0y3QqTqwlIs_wGVxApEzS2KsrHdbJrbbCyzfRjkGlQQNqED8FrHuD9em-kLMv0ER16b2i1YHApuvuNVmsj1w1UT7b4PyX4Bt-cl9_-PZchBpZjtM8cy7ktUjf83lV1eJCesxUm3bE4Jn-ABvDyVcJMmNsD-ZgWyKlP9AcGWLmPpQi_gDSJwpHV5m1LtDLuskdmo6axwHlOL8' }} 
+                    source={{ uri: 'https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?w=800&q=80' }} 
                     style={styles.pathImage}
                 >
                     <View style={styles.pathOverlay}>
@@ -402,7 +406,7 @@ function MainApp({ session }) {
 
              <View style={styles.pointsCard}>
                  <Text style={styles.pointsLabel}>CURRENT BALANCE</Text>
-                 <Text style={styles.pointsValue}>2,450 <Text style={styles.pointsUnit}>pts</Text></Text>
+                 <Text style={styles.pointsValue}>4,200 <Text style={styles.pointsUnit}>pts</Text></Text>
                  
                  <View style={styles.levelRow}>
                      <Text style={styles.levelText}>Level 4 Explorer</Text>
@@ -443,7 +447,7 @@ function MainApp({ session }) {
                      <Text style={styles.statLabel}>ROUTES SAVED</Text>
                  </View>
                  <View style={styles.statBox}>
-                     <Text style={styles.statValue}>4.2k</Text>
+                     <Text style={styles.statValue}>4,200</Text>
                      <Text style={styles.statLabel}>POINTS EARNED</Text>
                  </View>
              </View>
@@ -580,7 +584,7 @@ function MainApp({ session }) {
           <Map
             ref={mapRef}
             mapboxAccessToken={MAPBOX_TOKEN}
-            initialViewState={{ longitude: -73.976, latitude: 40.753, zoom: 15 }}
+            initialViewState={{ longitude: 73.8553, latitude: 18.5195, zoom: 13 }}
             style={{ width: '100%', height: '100%' }}
             mapStyle="mapbox://styles/mapbox/traffic-day-v2"
           >
@@ -592,16 +596,18 @@ function MainApp({ session }) {
               <Source id="heat-zones" type="geojson" data={heatData}>
                 <Layer 
                   id="heat-zones-layer" 
-                  type="fill" 
+                  type="circle" 
                   paint={{
-                    'fill-color': [
+                    'circle-color': [
                       'match', ['get', 'status'],
                       'RED', '#ef4444',
                       'YELLOW', '#f59e0b',
                       'GREEN', '#10b981',
                       '#ccc'
                     ],
-                    'fill-opacity': 0.6
+                    'circle-radius': 40,
+                    'circle-opacity': 0.6,
+                    'circle-blur': 0.8
                   }}
                 />
               </Source>
