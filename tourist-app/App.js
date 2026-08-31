@@ -63,48 +63,73 @@ function AuthScreen({ setSession }) {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-        <View style={{flex:1, justifyContent: 'center', padding: 20}}>
-            <Text style={{fontSize: 32, fontWeight: 'bold', color: '#00497d', textAlign: 'center', marginBottom: 10}}>FlowScape</Text>
-            <Text style={{fontSize: 16, color: '#414750', textAlign: 'center', marginBottom: 40}}>Live Heatmaps & Gamified Smart Routing for Heritage Tourism in Pune.</Text>
-            
-            <View style={{backgroundColor: '#ffffff', padding: 20, borderRadius: 12, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 4, elevation: 2}}>
-                <Text style={{fontSize: 20, fontWeight: 'bold', color: '#191c20', marginBottom: 20}}>Sign In / Sign Up</Text>
+    <View style={{flex: 1, backgroundColor: '#0a1628'}}>
+        <ScrollView contentContainerStyle={{flexGrow: 1, justifyContent: 'center', padding: 24}}>
+            {/* Branding */}
+            <View style={{alignItems: 'center', marginBottom: 32}}>
+                <View style={{width: 64, height: 64, borderRadius: 20, backgroundColor: '#00c9b7', alignItems: 'center', justifyContent: 'center', marginBottom: 16, shadowColor: '#00c9b7', shadowOpacity: 0.4, shadowRadius: 20}}>
+                    <MaterialIcons name="explore" size={36} color="#0a1628" />
+                </View>
+                <Text style={{fontSize: 36, fontWeight: '800', color: '#ffffff', letterSpacing: -1}}>FlowScape</Text>
+                <Text style={{fontSize: 15, color: '#8b9cc7', textAlign: 'center', marginTop: 8, lineHeight: 22}}>Live Heatmaps & Gamified Smart Routing{'\n'}for Heritage Tourism in Pune</Text>
+            </View>
+
+            {/* Feature Pills */}
+            <View style={{flexDirection: 'row', justifyContent: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 28}}>
+                <View style={{backgroundColor: 'rgba(0,201,183,0.15)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(0,201,183,0.3)'}}>
+                    <Text style={{color: '#00c9b7', fontSize: 12, fontWeight: '600'}}>AI Predictions</Text>
+                </View>
+                <View style={{backgroundColor: 'rgba(99,132,255,0.15)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(99,132,255,0.3)'}}>
+                    <Text style={{color: '#6384ff', fontSize: 12, fontWeight: '600'}}>Live Heatmaps</Text>
+                </View>
+                <View style={{backgroundColor: 'rgba(255,183,77,0.15)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255,183,77,0.3)'}}>
+                    <Text style={{color: '#ffb74d', fontSize: 12, fontWeight: '600'}}>Earn Rewards</Text>
+                </View>
+            </View>
+
+            {/* Login Card */}
+            <View style={{backgroundColor: 'rgba(255,255,255,0.06)', padding: 24, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)'}}>
+                <Text style={{fontSize: 18, fontWeight: '700', color: '#ffffff', marginBottom: 20}}>Get Started</Text>
                 
                 <TextInput
-                    style={styles.input}
+                    style={{backgroundColor: 'rgba(255,255,255,0.08)', padding: 16, borderRadius: 12, marginBottom: 12, color: '#ffffff', borderColor: 'rgba(255,255,255,0.12)', borderWidth: 1, fontSize: 15}}
                     placeholder="Email"
+                    placeholderTextColor="#5a6a8a"
                     value={email}
                     onChangeText={setEmail}
                     autoCapitalize="none"
                 />
                 <TextInput
-                    style={styles.input}
+                    style={{backgroundColor: 'rgba(255,255,255,0.08)', padding: 16, borderRadius: 12, marginBottom: 16, color: '#ffffff', borderColor: 'rgba(255,255,255,0.12)', borderWidth: 1, fontSize: 15}}
                     placeholder="Password"
+                    placeholderTextColor="#5a6a8a"
                     value={password}
                     onChangeText={setPassword}
                     secureTextEntry
                 />
                 
-                <TouchableOpacity style={styles.primaryButton} onPress={signInWithEmail} disabled={loading}>
-                    <Text style={styles.primaryButtonText}>{loading ? 'Loading...' : 'Sign In'}</Text>
+                <TouchableOpacity style={{backgroundColor: '#00c9b7', padding: 16, borderRadius: 12, alignItems: 'center', shadowColor: '#00c9b7', shadowOpacity: 0.3, shadowRadius: 12}} onPress={signInWithEmail} disabled={loading}>
+                    <Text style={{color: '#0a1628', fontWeight: 'bold', fontSize: 16}}>{loading ? 'Signing in...' : 'Sign In'}</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.primaryButton, {backgroundColor: 'transparent', borderWidth: 1, borderColor: '#00497d', marginTop: 10}]} onPress={signUpWithEmail} disabled={loading}>
-                    <Text style={[styles.primaryButtonText, {color: '#00497d'}]}>Create Account</Text>
+                <TouchableOpacity style={{padding: 16, borderRadius: 12, alignItems: 'center', marginTop: 10, borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)'}} onPress={signUpWithEmail} disabled={loading}>
+                    <Text style={{color: '#8b9cc7', fontWeight: '600', fontSize: 15}}>Create Account</Text>
                 </TouchableOpacity>
 
                 <View style={{flexDirection: 'row', alignItems: 'center', marginVertical: 20}}>
-                    <View style={{flex: 1, height: 1, backgroundColor: '#e1e2e8'}} />
-                    <Text style={{color: '#73777f', marginHorizontal: 10}}>OR</Text>
-                    <View style={{flex: 1, height: 1, backgroundColor: '#e1e2e8'}} />
+                    <View style={{flex: 1, height: 1, backgroundColor: 'rgba(255,255,255,0.1)'}} />
+                    <Text style={{color: '#5a6a8a', marginHorizontal: 12, fontSize: 13}}>or try it out</Text>
+                    <View style={{flex: 1, height: 1, backgroundColor: 'rgba(255,255,255,0.1)'}} />
                 </View>
 
-                <TouchableOpacity style={[styles.primaryButton, {backgroundColor: '#9deeed', marginTop: 0}]} onPress={() => setSession({ user: { email: 'demo@flowscape.com', id: 'demo-uuid-1234' } })}>
-                    <Text style={[styles.primaryButtonText, {color: '#00497d'}]}>🚀 Instant Demo Login</Text>
+                <TouchableOpacity style={{backgroundColor: 'rgba(0,201,183,0.15)', padding: 16, borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: 'rgba(0,201,183,0.3)'}} onPress={() => setSession({ user: { email: 'demo@flowscape.com', id: 'demo-uuid-1234' } })}>
+                    <Text style={{color: '#00c9b7', fontWeight: 'bold', fontSize: 16}}>Instant Demo Login</Text>
                 </TouchableOpacity>
             </View>
-        </View>
-    </SafeAreaView>
+
+            {/* Footer */}
+            <Text style={{color: '#3d4f6f', textAlign: 'center', marginTop: 24, fontSize: 12}}>Built for ASI Heritage Sites • Powered by ML</Text>
+        </ScrollView>
+    </View>
   );
 }
 
@@ -644,103 +669,104 @@ function MainApp({ session }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f8f9ff' },
-  header: { flexDirection: 'row', justifyContent: 'space-between', padding: 20, backgroundColor: '#f8f9ff', alignItems: 'center', borderBottomWidth: 1, borderColor: '#e1e2e8' },
-  headerTitle: { color: '#00497d', fontSize: 22, fontWeight: '700' },
-  badge: { position: 'absolute', top: 0, right: 0, width: 10, height: 10, borderRadius: 5, backgroundColor: '#ba1a1a', borderWidth: 2, borderColor: '#f8f9ff' },
+  container: { flex: 1, backgroundColor: '#f8faff' },
+  header: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 24, paddingTop: Platform.OS === 'ios' ? 60 : 24, paddingBottom: 16, backgroundColor: '#ffffff', alignItems: 'center', borderBottomWidth: 1, borderColor: '#f1f3f9' },
+  headerTitle: { color: '#0f172a', fontSize: 24, fontWeight: '800', letterSpacing: -0.5 },
+  badge: { position: 'absolute', top: -2, right: -2, width: 12, height: 12, borderRadius: 6, backgroundColor: '#ef4444', borderWidth: 2, borderColor: '#ffffff' },
   contentArea: { flex: 1 },
-  tabContent: { padding: 16 },
+  tabContent: { padding: 24 },
   
-  heroCard: { backgroundColor: '#eceef3', borderRadius: 12, height: 200, marginBottom: 24, overflow: 'hidden' },
-  heroOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', padding: 16, justifyContent: 'flex-end' },
-  heroTitle: { color: '#ffffff', fontSize: 24, fontWeight: 'bold' },
-  heroSubtitle: { color: '#dcd6dc', fontSize: 14, marginBottom: 12 },
-  capacityBadge: { backgroundColor: 'rgba(255,255,255,0.9)', padding: 12, borderRadius: 8, flexDirection: 'row', alignItems: 'center' },
+  heroCard: { backgroundColor: '#0f172a', borderRadius: 24, height: 220, marginBottom: 32, overflow: 'hidden', shadowColor: '#0f172a', shadowOpacity: 0.15, shadowRadius: 20, elevation: 8 },
+  heroOverlay: { flex: 1, backgroundColor: 'rgba(15, 23, 42, 0.4)', padding: 24, justifyContent: 'flex-end' },
+  heroTitle: { color: '#ffffff', fontSize: 28, fontWeight: '800', letterSpacing: -0.5 },
+  heroSubtitle: { color: '#94a3b8', fontSize: 15, marginBottom: 16, fontWeight: '500' },
+  capacityBadge: { backgroundColor: 'rgba(255,255,255,0.95)', padding: 16, borderRadius: 16, flexDirection: 'row', alignItems: 'center', shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 10 },
   capacityDot: { width: 12, height: 12, borderRadius: 6, marginRight: 12 },
-  capacityLabel: { fontSize: 11, color: '#414750', textTransform: 'uppercase', fontWeight: 'bold' },
-  capacityValue: { fontSize: 18, color: '#191c20', fontWeight: 'bold' },
-  capacitySub: { fontSize: 14, fontWeight: 'normal', color: '#414750' },
+  capacityLabel: { fontSize: 11, color: '#64748b', textTransform: 'uppercase', fontWeight: '800', letterSpacing: 0.5 },
+  capacityValue: { fontSize: 20, color: '#0f172a', fontWeight: '900' },
+  capacitySub: { fontSize: 14, fontWeight: '600', color: '#475569' },
 
-  savingsSection: { backgroundColor: '#9deeed33', borderRadius: 12, padding: 16, marginBottom: 24, borderColor: '#9deeed', borderWidth: 1 },
-  sectionTitle: { fontSize: 20, fontWeight: '600', color: '#191c20', marginBottom: 8, marginTop: 10 },
-  sectionSubtitle: { fontSize: 14, color: '#414750', marginBottom: 16 },
-  suggestionCard: { backgroundColor: '#ffffff', borderRadius: 8, padding: 12, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2, elevation: 2 },
-  suggestionTime: { fontSize: 16, color: '#191c20', fontWeight: '500' },
-  suggestionSub: { fontSize: 12, color: '#10b981', marginTop: 4 },
-  discountBadge: { backgroundColor: '#006a6a1a', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
-  discountText: { color: '#006a6a', fontWeight: '600' },
+  savingsSection: { backgroundColor: '#f0fdfa', borderRadius: 20, padding: 20, marginBottom: 32, borderColor: '#ccfbf1', borderWidth: 1 },
+  sectionTitle: { fontSize: 22, fontWeight: '800', color: '#0f172a', marginBottom: 8, marginTop: 12, letterSpacing: -0.5 },
+  sectionSubtitle: { fontSize: 15, color: '#64748b', marginBottom: 20, fontWeight: '500' },
+  suggestionCard: { backgroundColor: '#ffffff', borderRadius: 16, padding: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', shadowColor: '#0f172a', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 12, elevation: 2 },
+  suggestionTime: { fontSize: 18, color: '#0f172a', fontWeight: '700' },
+  suggestionSub: { fontSize: 13, color: '#0d9488', marginTop: 4, fontWeight: '600' },
+  discountBadge: { backgroundColor: '#ccfbf1', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20 },
+  discountText: { color: '#0f766e', fontWeight: '800', fontSize: 13 },
 
-  bookingCard: { backgroundColor: '#ffffff', borderRadius: 12, padding: 16, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 2, marginBottom: 24 },
-  detailRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8 },
-  detailLabel: { fontSize: 14, color: '#414750' },
-  detailValue: { fontSize: 14, color: '#191c20', fontWeight: '500' },
-  detailDiscount: { fontSize: 14, color: '#006a6a', fontWeight: '500' },
-  totalLabel: { fontSize: 18, fontWeight: 'bold', color: '#191c20' },
-  totalValue: { fontSize: 22, fontWeight: 'bold', color: '#00497d' },
-  primaryButton: { backgroundColor: '#00497d', padding: 16, borderRadius: 8, alignItems: 'center', marginTop: 16 },
-  primaryButtonText: { color: '#ffffff', fontWeight: 'bold', fontSize: 16 },
+  bookingCard: { backgroundColor: '#ffffff', borderRadius: 20, padding: 24, shadowColor: '#0f172a', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.06, shadowRadius: 24, elevation: 4, marginBottom: 32 },
+  detailRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10 },
+  detailLabel: { fontSize: 15, color: '#64748b', fontWeight: '500' },
+  detailValue: { fontSize: 15, color: '#0f172a', fontWeight: '700' },
+  detailDiscount: { fontSize: 15, color: '#0d9488', fontWeight: '700' },
+  totalLabel: { fontSize: 18, fontWeight: '800', color: '#0f172a' },
+  totalValue: { fontSize: 24, fontWeight: '900', color: '#6366f1' },
+  primaryButton: { backgroundColor: '#6366f1', padding: 18, borderRadius: 16, alignItems: 'center', marginTop: 24, shadowColor: '#6366f1', shadowOpacity: 0.3, shadowRadius: 12, shadowOffset: {width: 0, height: 4} },
+  primaryButtonText: { color: '#ffffff', fontWeight: '800', fontSize: 17 },
 
-  mapPlaceholder: { backgroundColor: '#eceef3', borderRadius: 12, padding: 24, alignItems: 'center' },
-  mapTitle: { fontSize: 20, fontWeight: 'bold', color: '#191c20', marginBottom: 8 },
-  mapSubtitle: { fontSize: 14, color: '#414750', textAlign: 'center', marginBottom: 24 },
+  mapPlaceholder: { backgroundColor: '#f1f5f9', borderRadius: 20, padding: 32, alignItems: 'center', borderWidth: 1, borderColor: '#e2e8f0', borderStyle: 'dashed' },
+  mapTitle: { fontSize: 20, fontWeight: '800', color: '#0f172a', marginBottom: 8 },
+  mapSubtitle: { fontSize: 15, color: '#64748b', textAlign: 'center', marginBottom: 24, fontWeight: '500' },
   
-  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 16 },
-  viewAllText: { color: '#00497d', fontSize: 14, fontWeight: '500' },
-  pathCard: { backgroundColor: '#ffffff', borderRadius: 12, overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 4, elevation: 2, marginBottom: 16 },
-  pathImage: { height: 160, justifyContent: 'flex-end' },
-  pathOverlay: { backgroundColor: 'rgba(0,0,0,0.5)', padding: 12 },
-  gemBadge: { backgroundColor: '#9deeed', alignSelf: 'flex-start', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12, marginBottom: 4 },
-  gemBadgeText: { fontSize: 10, color: '#0b6e6e', fontWeight: 'bold' },
-  pathTitle: { color: '#ffffff', fontSize: 18, fontWeight: 'bold', marginBottom: 4 },
-  densityBadge: { backgroundColor: 'rgba(255,255,255,0.8)', alignSelf: 'flex-start', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
-  densityBadgeText: { fontSize: 12, color: '#191c20', fontWeight: 'bold' },
-  pathFooter: { padding: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  pathPoints: { fontSize: 12, color: '#414750', fontWeight: '600' },
-  pathMeta: { fontSize: 14, color: '#191c20' },
-  startButton: { backgroundColor: '#0061a4', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20 },
-  startButtonText: { color: '#ffffff', fontWeight: 'bold' },
-  pointsCard: { backgroundColor: '#00497d', borderRadius: 12, padding: 20, marginBottom: 24, marginTop: 8 },
-  pointsLabel: { color: 'rgba(255,255,255,0.8)', fontSize: 11, fontWeight: 'bold' },
-  pointsValue: { color: '#ffffff', fontSize: 40, fontWeight: 'bold', marginVertical: 8 },
-  pointsUnit: { fontSize: 20, fontWeight: 'normal', opacity: 0.8 },
-  levelRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
-  levelText: { color: 'rgba(255,255,255,0.9)', fontSize: 12 },
-  progressBarBg: { height: 8, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 4, overflow: 'hidden' },
-  progressBarFill: { height: 8, backgroundColor: '#9deeed', borderRadius: 4 },
-  pointsHint: { color: 'rgba(255,255,255,0.8)', fontSize: 12, marginTop: 8 },
+  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 16, marginBottom: 8 },
+  viewAllText: { color: '#6366f1', fontSize: 15, fontWeight: '700' },
+  pathCard: { backgroundColor: '#ffffff', borderRadius: 20, overflow: 'hidden', shadowColor: '#0f172a', shadowOpacity: 0.06, shadowRadius: 16, elevation: 3, marginBottom: 20 },
+  pathImage: { height: 180, justifyContent: 'flex-end' },
+  pathOverlay: { backgroundColor: 'rgba(15,23,42,0.4)', padding: 16 },
+  gemBadge: { backgroundColor: '#fef08a', alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12, marginBottom: 8 },
+  gemBadgeText: { fontSize: 11, color: '#854d0e', fontWeight: '800', textTransform: 'uppercase' },
+  pathTitle: { color: '#ffffff', fontSize: 22, fontWeight: '800', marginBottom: 6 },
+  densityBadge: { backgroundColor: 'rgba(255,255,255,0.9)', alignSelf: 'flex-start', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
+  densityBadgeText: { fontSize: 13, color: '#0f172a', fontWeight: '700' },
+  pathFooter: { padding: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  pathPoints: { fontSize: 14, color: '#6366f1', fontWeight: '800', marginBottom: 4 },
+  pathMeta: { fontSize: 15, color: '#64748b', fontWeight: '500' },
+  startButton: { backgroundColor: '#0f172a', paddingHorizontal: 20, paddingVertical: 10, borderRadius: 24 },
+  startButtonText: { color: '#ffffff', fontWeight: '700', fontSize: 15 },
+  
+  pointsCard: { backgroundColor: '#6366f1', borderRadius: 24, padding: 24, marginBottom: 32, marginTop: 8, shadowColor: '#6366f1', shadowOpacity: 0.3, shadowRadius: 20, shadowOffset: {width: 0, height: 8} },
+  pointsLabel: { color: 'rgba(255,255,255,0.8)', fontSize: 13, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
+  pointsValue: { color: '#ffffff', fontSize: 48, fontWeight: '900', marginVertical: 8, letterSpacing: -1 },
+  pointsUnit: { fontSize: 20, fontWeight: '600', opacity: 0.9 },
+  levelRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 },
+  levelText: { color: 'rgba(255,255,255,0.95)', fontSize: 14, fontWeight: '600' },
+  progressBarBg: { height: 12, backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: 6, overflow: 'hidden' },
+  progressBarFill: { height: 12, backgroundColor: '#34d399', borderRadius: 6 },
+  pointsHint: { color: 'rgba(255,255,255,0.8)', fontSize: 13, marginTop: 12, fontWeight: '500' },
 
-  profileHeader: { alignItems: 'center', backgroundColor: '#f2f3f9', borderRadius: 12, padding: 24, marginBottom: 16, borderColor: '#e1e2e8', borderWidth: 1 },
-  avatarContainer: { position: 'relative', marginBottom: 12 },
-  avatarImage: { width: 96, height: 96, borderRadius: 48, borderWidth: 4, borderColor: '#ffffff' },
-  profileName: { fontSize: 28, fontWeight: 'bold', color: '#191c20', marginBottom: 4 },
-  levelBadge: { backgroundColor: 'rgba(157,238,237,0.5)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 16 },
-  levelBadgeText: { color: '#0b6e6e', fontSize: 14, fontWeight: 'bold' },
-  statsGrid: { flexDirection: 'row', gap: 12, marginBottom: 24 },
-  statBox: { flex: 1, backgroundColor: '#eceef3', borderRadius: 8, padding: 16, alignItems: 'center' },
-  statValue: { fontSize: 22, fontWeight: 'bold', color: '#00497d', marginBottom: 4 },
-  statLabel: { fontSize: 10, color: '#414750', fontWeight: 'bold' },
-  activityList: { backgroundColor: '#ffffff', borderRadius: 12, borderColor: '#e1e2e8', borderWidth: 1, overflow: 'hidden' },
-  activityItem: { flexDirection: 'row', padding: 16, borderBottomWidth: 1, borderColor: '#e1e2e8', alignItems: 'center' },
+  profileHeader: { alignItems: 'center', backgroundColor: '#ffffff', borderRadius: 24, padding: 32, marginBottom: 20, shadowColor: '#0f172a', shadowOpacity: 0.05, shadowRadius: 16 },
+  avatarContainer: { position: 'relative', marginBottom: 16 },
+  avatarImage: { width: 100, height: 100, borderRadius: 50, borderWidth: 4, borderColor: '#f8faff' },
+  profileName: { fontSize: 26, fontWeight: '800', color: '#0f172a', marginBottom: 8, letterSpacing: -0.5 },
+  levelBadge: { backgroundColor: '#e0e7ff', paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20 },
+  levelBadgeText: { color: '#4338ca', fontSize: 14, fontWeight: '800' },
+  statsGrid: { flexDirection: 'row', gap: 16, marginBottom: 32 },
+  statBox: { flex: 1, backgroundColor: '#ffffff', borderRadius: 20, padding: 20, alignItems: 'center', shadowColor: '#0f172a', shadowOpacity: 0.04, shadowRadius: 12 },
+  statValue: { fontSize: 28, fontWeight: '900', color: '#0f172a', marginBottom: 4 },
+  statLabel: { fontSize: 11, color: '#64748b', fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.5 },
+  activityList: { backgroundColor: '#ffffff', borderRadius: 20, overflow: 'hidden', shadowColor: '#0f172a', shadowOpacity: 0.04, shadowRadius: 12 },
+  activityItem: { flexDirection: 'row', padding: 20, borderBottomWidth: 1, borderColor: '#f1f5f9', alignItems: 'center' },
   activityInfo: { flex: 1 },
-  activityTitle: { fontSize: 14, fontWeight: 'bold', color: '#191c20' },
-  activityMeta: { fontSize: 12, color: '#414750' },
+  activityTitle: { fontSize: 16, fontWeight: '700', color: '#0f172a', marginBottom: 4 },
+  activityMeta: { fontSize: 13, color: '#64748b', fontWeight: '500' },
   activityPoints: { alignItems: 'flex-end' },
-  activitySaved: { fontSize: 12, color: '#006a6a', marginBottom: 2 },
-  activityScore: { fontSize: 12, fontWeight: 'bold', color: '#00497d' },
-  logoutButton: { backgroundColor: '#ffdad6', padding: 16, borderRadius: 8, alignItems: 'center', marginTop: 24 },
-  logoutText: { color: '#93000a', fontWeight: 'bold', fontSize: 16 },
+  activitySaved: { fontSize: 13, color: '#0d9488', marginBottom: 4, fontWeight: '600' },
+  activityScore: { fontSize: 15, fontWeight: '800', color: '#6366f1' },
+  logoutButton: { backgroundColor: '#fef2f2', padding: 18, borderRadius: 16, alignItems: 'center', marginTop: 32 },
+  logoutText: { color: '#ef4444', fontWeight: '800', fontSize: 16 },
   
-  input: { backgroundColor: '#f2f3f9', padding: 16, borderRadius: 8, marginBottom: 12, color: '#191c20', borderColor: '#e1e2e8', borderWidth: 1 },
+  input: { backgroundColor: '#f8faff', padding: 18, borderRadius: 16, marginBottom: 16, color: '#0f172a', fontSize: 16, fontWeight: '500' },
 
-  alertCardRed: { backgroundColor: '#ffdad6', borderRadius: 12, padding: 16, marginBottom: 12, borderColor: 'rgba(186, 26, 26, 0.2)', borderWidth: 1 },
-  alertTitleRed: { fontSize: 16, fontWeight: 'bold', color: '#93000a' },
-  alertDescRed: { fontSize: 14, color: '#93000a' },
-  alertTime: { fontSize: 12, color: 'rgba(147, 0, 10, 0.8)', marginTop: 8 },
-  notificationCard: { backgroundColor: '#ffffff', borderRadius: 12, padding: 16, marginBottom: 12, borderColor: '#e1e2e8', borderWidth: 1, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 2, elevation: 1 },
+  alertCardRed: { backgroundColor: '#fef2f2', borderRadius: 20, padding: 20, marginBottom: 16, borderColor: '#fca5a5', borderWidth: 1 },
+  alertTitleRed: { fontSize: 17, fontWeight: '800', color: '#b91c1c', marginBottom: 4 },
+  alertDescRed: { fontSize: 15, color: '#991b1b', lineHeight: 22 },
+  alertTime: { fontSize: 13, color: '#ef4444', marginTop: 12, fontWeight: '600' },
+  notificationCard: { backgroundColor: '#ffffff', borderRadius: 20, padding: 20, marginBottom: 16, shadowColor: '#0f172a', shadowOpacity: 0.04, shadowRadius: 12, elevation: 2 },
 
-  tabBar: { flexDirection: 'row', backgroundColor: '#eceef3', paddingVertical: 10, paddingBottom: Platform.OS === 'ios' ? 24 : 10, borderTopLeftRadius: 16, borderTopRightRadius: 16 },
+  tabBar: { flexDirection: 'row', backgroundColor: '#ffffff', paddingVertical: 12, paddingBottom: Platform.OS === 'ios' ? 32 : 16, borderTopLeftRadius: 24, borderTopRightRadius: 24, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 20, elevation: 16 },
   tabButton: { flex: 1, alignItems: 'center', paddingVertical: 8 },
-  tabButtonActive: { backgroundColor: '#9deeed', borderRadius: 20, marginHorizontal: 10 },
-  tabText: { fontSize: 11, color: '#414750', marginTop: 4, fontWeight: '500' },
-  tabTextActive: { color: '#0b6e6e', fontWeight: 'bold' }
+  tabButtonActive: { backgroundColor: '#f1f5f9', borderRadius: 24, marginHorizontal: 12 },
+  tabText: { fontSize: 12, color: '#64748b', marginTop: 6, fontWeight: '600' },
+  tabTextActive: { color: '#0f172a', fontWeight: '800' }
 });
