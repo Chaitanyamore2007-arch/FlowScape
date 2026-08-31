@@ -582,9 +582,13 @@ function MainApp({ session, cityData }) {
           <View style={styles.tabContent}>
              <View style={styles.profileHeader}>
                  <View style={styles.avatarContainer}>
-                    <ImageBackground source={{uri: 'https://i.pravatar.cc/150?u=a042581f4e29026704d'}} style={styles.avatarImage} imageStyle={{borderRadius: 50}} />
+                     <View style={[styles.avatarImage, { backgroundColor: '#00497d', alignItems: 'center', justifyContent: 'center' }]}>
+                         <Text style={{ fontSize: 48, color: '#fff', fontWeight: 'bold' }}>
+                             {session?.user?.email ? session.user.email[0].toUpperCase() : 'G'}
+                         </Text>
+                     </View>
                  </View>
-                 <Text style={styles.profileName}>Chaitanya</Text>
+                 <Text style={styles.profileName}>{session?.user?.email ? session.user.email.split('@')[0] : 'Guest Explorer'}</Text>
                  <View style={styles.levelBadge}><Text style={styles.levelBadgeText}>Heritage Explorer</Text></View>
              </View>
 
