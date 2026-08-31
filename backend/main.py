@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, WebSocket, Depends
+from fastapi import FastAPI, HTTPException, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from database import supabase
 from models import Venue, Zone, BookingCreate, Booking
@@ -6,6 +6,10 @@ from typing import List
 import asyncio
 import random
 import os
+from pathlib import Path
+import joblib
+import datetime
+import pandas as pd
 import json
 import redis
 from twilio.rest import Client
@@ -31,29 +35,31 @@ TEST_USER_PHONE = os.environ.get('TEST_USER_PHONE')
 
 app = FastAPI(title="FlowScape MVP API")
 
+ALLOWED_ORIGINS = os.environ.get('ALLOWED_ORIGINS', 'https://flow-scape.vercel.app,http://localhost:8081,http://localhost:5173').split(',')
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-@app.get("/")
+@app.get("/", summary="Health check", description="Returns API status.")
 def read_root():
     return {"message": "Welcome to FlowScape MVP API"}
 
-@app.get("/venues", response_model=List[Venue])
+@app.get("/venues", response_model=List[Venue], summary="List venues", description="Returns all heritage tourist venues.")
 def get_venues():
     response = supabase.table("venues").select("*").execute()
     return response.data
 
-@app.get("/venues/{venue_id}/zones", response_model=List[Zone])
+@app.get("/venues/{venue_id}/zones", response_model=List[Zone], summary="Get venue zones", description="Returns all density monitoring zones for a venue.")
 def get_zones(venue_id: str):
     response = supabase.table("zones").select("*").eq("venue_id", venue_id).execute()
     return response.data
 
-@app.post("/bookings", response_model=Booking)
+@app.post("/bookings", response_model=Booking, summary="Create booking", description="Books a time slot and optionally sends WhatsApp confirmation via Twilio.")
 def create_booking(booking: BookingCreate, user_id: str = "mock-user-uuid"):
     data = {
         "user_id": user_id,
@@ -92,12 +98,9 @@ def create_booking(booking: BookingCreate, user_id: str = "mock-user-uuid"):
     return response.data[0]
 
 # WebSockets for Heatmaps
-import joblib
-import datetime
-import pandas as pd
 
 try:
-    rf_model = joblib.load("density_model.joblib")
+    rf_model = joblib.load(Path(__file__).parent / "density_model.joblib")
     print("Successfully loaded Random Forest Model!")
 except Exception as e:
     rf_model = None
@@ -146,11 +149,18 @@ async def websocket_alerts(websocket: WebSocket):
     try:
         while True:
             await websocket.receive_text() # Keep connection open
-    except:
-        active_alert_connections.remove(websocket)
+    except Exception:
+        if websocket in active_alert_connections:
+            active_alert_connections.remove(websocket)
 
-@app.post("/admin/broadcast")
+@app.post("/admin/broadcast", summary="Broadcast emergency alert", description="Sends a real-time alert to all connected tourist app users via WebSocket.")
 async def broadcast_alert(message: str):
+    failed = []
     for connection in active_alert_connections:
-        await connection.send_json({"type": "ALERT", "message": message})
-    return {"message": "Alert broadcasted"}
+        try:
+            await connection.send_json({"type": "ALERT", "message": message})
+        except Exception:
+            failed.append(connection)
+    for conn in failed:
+        active_alert_connections.remove(conn)
+    return {"message": "Alert broadcasted", "recipients": len(active_alert_connections)}

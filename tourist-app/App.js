@@ -20,7 +20,7 @@ export default function App() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-    });
+    }).catch(err => console.error('Failed to get session:', err));
 
     supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
@@ -137,7 +137,7 @@ function MainApp({ session }) {
   const [selectedLocation, setSelectedLocation] = useState('Detecting nearest location...');
   const [searchQuery, setSearchQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const searchPlaces = ['Central Park', 'Times Square', 'Empire State Building', 'Grand Central Station', 'Statue of Liberty', 'Brooklyn Bridge'];
+  const searchPlaces = ['Shaniwar Wada', 'Aga Khan Palace', 'Pataleshwar Caves', 'Dagdusheth Ganpati', 'Sinhagad Fort', 'Lal Mahal'];
   const filteredPlaces = searchPlaces.filter(place => place.toLowerCase().includes(searchQuery.toLowerCase()));
   
   const heatmapsWs = useRef(null);
@@ -145,12 +145,12 @@ function MainApp({ session }) {
   const mapRef = useRef(null);
 
   const placeCoordinates = {
-      'Central Park': [-73.965, 40.782],
-      'Times Square': [-73.985, 40.758],
-      'Empire State Building': [-73.985, 40.748],
-      'Grand Central Station': [-73.976, 40.753],
-      'Statue of Liberty': [-74.044, 40.689],
-      'Brooklyn Bridge': [-73.996, 40.706]
+      'Shaniwar Wada': [73.8553, 18.5195],
+      'Aga Khan Palace': [73.9015, 18.5523],
+      'Pataleshwar Caves': [73.8500, 18.5266],
+      'Dagdusheth Ganpati': [73.8560, 18.5163],
+      'Sinhagad Fort': [73.7558, 18.3664],
+      'Lal Mahal': [73.8568, 18.5148]
   };
 
   useEffect(() => {
@@ -162,58 +162,68 @@ function MainApp({ session }) {
     const connectHeatmaps = () => {
       heatmapsWs.current = new WebSocket('wss://flowscape.onrender.com/ws/heatmaps');
       heatmapsWs.current.onmessage = (event) => {
-        const msg = JSON.parse(event.data);
-        if (msg.type === 'DENSITY_UPDATE') {
-          const updates = msg.data;
-          const hasRedZone = updates.some(u => u.status === 'RED');
+        try {
+          const msg = JSON.parse(event.data);
+          if (msg.type === 'DENSITY_UPDATE') {
+            const updates = msg.data;
+            const hasRedZone = updates.some(u => u.status === 'RED');
           
-          // Simulated Pune Tourist Sites Heatmap
-          const siteCoordinates = [
-            [73.8553, 18.5195], // Shaniwar Wada
-            [73.8500, 18.5266], // Pataleshwar
-            [73.9015, 18.5523], // Aga Khan Palace
-            [73.8430, 18.5080], // Saras Baug
-            [73.8640, 18.5230]  // Dagdusheth
-          ];
-          const geojson = {
-            type: 'FeatureCollection',
-            features: updates.slice(0, 5).map((u, i) => ({
-               type: 'Feature',
-               properties: { status: i === 0 ? 'RED' : i === 1 ? 'YELLOW' : 'GREEN' }, // Force distinct colors for demo
-               geometry: {
-                   type: 'Point',
-                   coordinates: siteCoordinates[i % siteCoordinates.length]
-               }
-            }))
-          };
-          setHeatData(geojson);
+            // Simulated Pune Tourist Sites Heatmap
+            const siteCoordinates = [
+              [73.8553, 18.5195], // Shaniwar Wada
+              [73.8500, 18.5266], // Pataleshwar
+              [73.9015, 18.5523], // Aga Khan Palace
+              [73.8430, 18.5080], // Saras Baug
+              [73.8640, 18.5230]  // Dagdusheth
+            ];
+            const geojson = {
+              type: 'FeatureCollection',
+              features: updates.slice(0, 5).map((u, i) => ({
+                type: 'Feature',
+                properties: { status: i === 0 ? 'RED' : i === 1 ? 'YELLOW' : 'GREEN' },
+                geometry: {
+                    type: 'Point',
+                    coordinates: siteCoordinates[i % siteCoordinates.length]
+                }
+              }))
+            };
+            setHeatData(geojson);
   
-          if (hasRedZone) {
-            setCapacity(88);
-            setCapacityStatus('High');
-            setIncentive('Peak hours detected! Shift your departure time to avoid crowds and save.');
-            setDiscount(15);
-          } else {
-            setCapacity(45);
-            setCapacityStatus('Moderate');
-            setIncentive('Standard booking available.');
-            setDiscount(0);
+            if (hasRedZone) {
+              setCapacity(88);
+              setCapacityStatus('High');
+              setIncentive('Peak hours detected! Shift your departure time to avoid crowds and save.');
+              setDiscount(15);
+            } else {
+              setCapacity(45);
+              setCapacityStatus('Moderate');
+              setIncentive('Standard booking available.');
+              setDiscount(0);
+            }
           }
+        } catch (e) {
+          console.error('Heatmap WS parse error:', e);
         }
       };
+      heatmapsWs.current.onerror = (err) => console.error('Heatmap WS error:', err);
       heatmapsWs.current.onclose = () => setTimeout(connectHeatmaps, 3000);
     };
 
     const connectAlerts = () => {
       alertsWs.current = new WebSocket('wss://flowscape.onrender.com/ws/alerts');
       alertsWs.current.onmessage = (event) => {
-        const msg = JSON.parse(event.data);
-        if (msg.type === 'ALERT') {
-          setLiveAlerts(prev => [{ id: Date.now(), message: msg.message, time: 'Just now' }, ...prev]);
-          if (Platform.OS === 'web') window.alert("Emergency Broadcast\n\n" + msg.message);
-          else Alert.alert("Emergency Broadcast", msg.message);
+        try {
+          const msg = JSON.parse(event.data);
+          if (msg.type === 'ALERT') {
+            setLiveAlerts(prev => [{ id: Date.now(), message: msg.message, time: 'Just now' }, ...prev]);
+            if (Platform.OS === 'web') window.alert("Emergency Broadcast\n\n" + msg.message);
+            else Alert.alert("Emergency Broadcast", msg.message);
+          }
+        } catch (e) {
+          console.error('Alert WS parse error:', e);
         }
       };
+      alertsWs.current.onerror = (err) => console.error('Alert WS error:', err);
       alertsWs.current.onclose = () => setTimeout(connectAlerts, 3000);
     };
 
@@ -228,7 +238,7 @@ function MainApp({ session }) {
 
   const handleBooking = async () => {
     try {
-        const response = await fetch('https://flowscape.onrender.com/bookings?user_id=' + session.user.id, {
+        const response = await fetch('https://flowscape.onrender.com/bookings?user_id=' + (session?.user?.id || 'anonymous'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -238,14 +248,18 @@ function MainApp({ session }) {
             })
         });
         if (response.ok) {
-            const msg = "Departure schedule confirmed! " + (discount > 0 ? "You've earned 150 Bonus Points for routing smartly." : "You earned 20 Points.");
+            const msg = "Departure schedule confirmed! " + (currentPlan.bonus > 0 ? "You've earned " + currentPlan.bonus + " Bonus Points for routing smartly." : "You earned 10 Points.");
             if (Platform.OS === 'web') window.alert("Success\n\n" + msg);
             else Alert.alert("Success", msg);
         } else {
-            if (Platform.OS === 'web') window.alert("Scheduling Failed");
+            const errMsg = "Scheduling failed. Please try again.";
+            if (Platform.OS === 'web') window.alert(errMsg);
+            else Alert.alert("Error", errMsg);
         }
     } catch (e) {
-        if (Platform.OS === 'web') window.alert("Error connecting to backend");
+        const errMsg = "Could not connect to the server. Check your internet connection.";
+        if (Platform.OS === 'web') window.alert(errMsg);
+        else Alert.alert("Connection Error", errMsg);
     }
   };
 
@@ -303,7 +317,7 @@ function MainApp({ session }) {
                     
                     <View style={styles.suggestionCard}>
                         <View>
-                            <Text style={styles.suggestionTime}>11:30 AM</Text>
+                            <Text style={styles.suggestionTime}>{new Date(Date.now() + 90 * 60000).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</Text>
                             <Text style={styles.suggestionSub}>Very Low Crowd</Text>
                         </View>
                         <View style={styles.discountBadge}>
@@ -348,7 +362,7 @@ function MainApp({ session }) {
                   {timeOptions.map((opt, i) => (
                       <TouchableOpacity 
                           key={i} 
-                          style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 16, borderBottomWidth: i === 2 ? 0 : 1, borderColor: '#f2f3f9' }}
+                          style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 16, borderBottomWidth: i === timeOptions.length - 1 ? 0 : 1, borderColor: '#f2f3f9' }}
                           onPress={() => { setTimeIndex(i); setShowTimePicker(false); }}
                       >
                           <Text style={{ fontSize: 18, color: timeIndex === i ? '#00497d' : '#191c20', fontWeight: timeIndex === i ? 'bold' : 'normal' }}>{opt.time}</Text>
@@ -386,14 +400,14 @@ function MainApp({ session }) {
                 >
                     <View style={styles.pathOverlay}>
                         <View style={styles.gemBadge}><Text style={styles.gemBadgeText}>Hidden Gem</Text></View>
-                        <Text style={styles.pathTitle}>The Artisan's Walk</Text>
+                        <Text style={styles.pathTitle}>Peshwa Heritage Trail</Text>
                         <View style={styles.densityBadge}><Text style={styles.densityBadgeText}>Low Crowd</Text></View>
                     </View>
                 </ImageBackground>
                 <View style={styles.pathFooter}>
                     <View>
                         <Text style={styles.pathPoints}>+150 Pts</Text>
-                        <Text style={styles.pathMeta}>1.2 mi • 25 min</Text>
+                        <Text style={styles.pathMeta}>1.9 km • 25 min</Text>
                     </View>
                     <TouchableOpacity style={styles.startButton}><Text style={styles.startButtonText}>Start</Text></TouchableOpacity>
                 </View>
@@ -412,7 +426,7 @@ function MainApp({ session }) {
                      <Text style={styles.levelText}>Level 4 Explorer</Text>
                      <Text style={styles.levelText}>3,000 pts</Text>
                  </View>
-                 <View style={styles.progressBarBg}><View style={[styles.progressBarFill, { width: '82%' }]} /></View>
+                 <View style={styles.progressBarBg}><View style={[styles.progressBarFill, { width: '69%' }]} /></View>
                  <Text style={styles.pointsHint}>550 pts to free museum entry</Text>
              </View>
           </View>
@@ -428,7 +442,7 @@ function MainApp({ session }) {
                          </Text>
                      </View>
                  </View>
-                 <Text style={styles.profileName}>{session?.user?.email || 'Alex Miller'}</Text>
+                 <Text style={styles.profileName}>{session?.user?.email || 'Explorer'}</Text>
                  <View style={[styles.levelBadge, { backgroundColor: '#d1e4ff', marginTop: 4 }]}>
                      <Text style={[styles.levelBadgeText, { color: '#00497d' }]}>✓ Email Verified</Text>
                  </View>
@@ -439,8 +453,8 @@ function MainApp({ session }) {
 
              <View style={styles.statsGrid}>
                  <View style={styles.statBox}>
-                     <Text style={styles.statValue}>245</Text>
-                     <Text style={styles.statLabel}>TOTAL MILES</Text>
+                     <Text style={styles.statValue}>394</Text>
+                     <Text style={styles.statLabel}>TOTAL KM</Text>
                  </View>
                  <View style={styles.statBox}>
                      <Text style={styles.statValue}>12</Text>
@@ -456,8 +470,8 @@ function MainApp({ session }) {
              <View style={styles.activityList}>
                  <View style={styles.activityItem}>
                      <View style={styles.activityInfo}>
-                         <Text style={styles.activityTitle}>Park Perimeter Path</Text>
-                         <Text style={styles.activityMeta}>Today • 3.2 mi</Text>
+                         <Text style={styles.activityTitle}>Shaniwar Wada Heritage Walk</Text>
+                         <Text style={styles.activityMeta}>Today • 5.1 km</Text>
                      </View>
                      <View style={styles.activityPoints}>
                          <Text style={styles.activitySaved}>Saved 15m</Text>
@@ -497,7 +511,7 @@ function MainApp({ session }) {
                     <Text style={{fontWeight: 'bold', color: '#191c20', fontSize: 16}}>Reward Earned</Text>
                     <Text style={{color: '#414750', fontSize: 12}}>1h ago</Text>
                 </View>
-                <Text style={{color: '#414750'}}>You earned 50 pts for avoiding the Central Plaza rush!</Text>
+                <Text style={{color: '#414750'}}>You earned 50 pts for avoiding the Dagdusheth Temple rush!</Text>
              </View>
           </View>
         )}

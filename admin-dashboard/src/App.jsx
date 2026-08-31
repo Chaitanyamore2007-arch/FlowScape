@@ -6,14 +6,16 @@ const geojsonTemplate = {
   type: 'FeatureCollection',
   features: [
     {
-      type: 'Feature', id: 'zone-main',
-      properties: { name: 'Main Entrance', color: '#22c55e' },
-      geometry: { type: 'Polygon', coordinates: [[[-74.0060, 40.7128], [-74.0050, 40.7128], [-74.0050, 40.7138], [-74.0060, 40.7138], [-74.0060, 40.7128]]] }
+      type: 'Feature',
+      id: 'zone-main',
+      properties: { color: '#22c55e' },
+      geometry: { type: 'Polygon', coordinates: [[[73.854, 18.520], [73.856, 18.520], [73.856, 18.518], [73.854, 18.518], [73.854, 18.520]]] }
     },
     {
-      type: 'Feature', id: 'zone-gardens',
-      properties: { name: 'Royal Gardens', color: '#22c55e' },
-      geometry: { type: 'Polygon', coordinates: [[[-74.0050, 40.7128], [-74.0030, 40.7128], [-74.0030, 40.7138], [-74.0050, 40.7138], [-74.0050, 40.7128]]] }
+      type: 'Feature',
+      id: 'zone-gardens',
+      properties: { color: '#22c55e' },
+      geometry: { type: 'Polygon', coordinates: [[[73.900, 18.553], [73.903, 18.553], [73.903, 18.551], [73.900, 18.551], [73.900, 18.553]]] }
     }
   ]
 }
@@ -25,28 +27,37 @@ function App() {
   const ws = useRef(null)
 
   useEffect(() => {
-    ws.current = new WebSocket('wss://flowscape.onrender.com/ws/heatmaps')
-    ws.current.onmessage = (event) => {
-      const msg = JSON.parse(event.data)
-      if (msg.type === 'DENSITY_UPDATE') {
-        const updates = msg.data
-        setGeoData(prev => {
-            const newGeo = { ...prev }
-            const colors = { 'GREEN': '#22c55e', 'YELLOW': '#eab308', 'RED': '#ef4444' }
-            newGeo.features = newGeo.features.map(f => {
-                const randomUpdate = updates[Math.floor(Math.random() * updates.length)]
-                if(randomUpdate) f.properties.color = colors[randomUpdate.status] || '#22c55e'
-                return f
+    const connectWs = () => {
+      ws.current = new WebSocket('wss://flowscape.onrender.com/ws/heatmaps')
+      ws.current.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data)
+          if (msg.type === 'DENSITY_UPDATE') {
+            const updates = msg.data
+            setGeoData(prev => {
+                const newGeo = { ...prev }
+                const colors = { 'GREEN': '#22c55e', 'YELLOW': '#eab308', 'RED': '#ef4444' }
+                newGeo.features = newGeo.features.map(f => {
+                    const randomUpdate = updates[Math.floor(Math.random() * updates.length)]
+                    if(randomUpdate) f.properties.color = colors[randomUpdate.status] || '#22c55e'
+                    return f
+                })
+                return newGeo
             })
-            return newGeo
-        })
+          }
+        } catch (e) {
+          console.error('Failed to parse WebSocket message:', e)
+        }
       }
+      ws.current.onerror = (err) => console.error('WebSocket error:', err)
+      ws.current.onclose = () => setTimeout(connectWs, 3000)
     }
-    return () => { if(ws.current) ws.current.close() }
+    connectWs()
+    return () => { if (ws.current) ws.current.close() }
   }, [])
 
   const sendAlert = async () => {
-    if (!alertMsg) return
+    if (!alertMsg.trim()) return
     try {
         const response = await fetch('https://flowscape.onrender.com/admin/broadcast?message=' + encodeURIComponent(alertMsg), { method: 'POST' })
         if(response.ok) {
@@ -69,7 +80,7 @@ function App() {
             <div className="flex items-center gap-4">
                 <span className="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-container-low rounded-full p-2 transition-colors active:scale-95 duration-200">notifications</span>
                 <div className="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-label-lg text-label-lg cursor-pointer hover:bg-primary/80 transition-colors">
-                    AM
+                    FS
                 </div>
             </div>
         </header>
@@ -99,7 +110,7 @@ function App() {
             <div className="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
                 <div className="flex-1 relative h-full bg-surface-variant">
                     <Map
-                        initialViewState={{ longitude: -74.0045, latitude: 40.7133, zoom: 16 }}
+                        initialViewState={{ longitude: 73.8553, latitude: 18.5195, zoom: 14 }}
                         mapStyle="mapbox://styles/mapbox/light-v11"
                         mapboxAccessToken={import.meta.env.VITE_MAPBOX_TOKEN}
                         style={{ width: '100%', height: '100%', position: 'absolute', inset: 0 }}
@@ -123,7 +134,7 @@ function App() {
                             <h2 className="font-title-lg text-title-lg text-on-surface mb-4">Site Status</h2>
                             <div className="flex justify-between items-center">
                                 <div>
-                                    <div className="font-display-lg text-display-lg text-primary">14.2k</div>
+                                    <div className="font-display-lg text-display-lg text-primary">1,847</div>
                                     <div className="font-body-md text-body-md text-on-surface-variant">Total Occupancy</div>
                                 </div>
                                 <div className="relative w-24 h-24">
@@ -132,7 +143,7 @@ function App() {
                                         <circle className="text-primary" cx="50" cy="50" fill="none" r="40" stroke="currentColor" strokeDasharray="251.2" strokeDashoffset="62.8" strokeWidth="8"></circle>
                                     </svg>
                                     <div className="absolute inset-0 flex items-center justify-center flex-col">
-                                        <span className="font-label-lg text-label-lg font-bold text-on-surface">75%</span>
+                                        <span className="font-label-lg text-label-lg font-bold text-on-surface">68%</span>
                                     </div>
                                 </div>
                             </div>
@@ -156,7 +167,7 @@ function App() {
                                     value={alertMsg}
                                     onChange={e => setAlertMsg(e.target.value)}
                                 ></textarea>
-                                {broadcastStatus && <p className="text-sm text-green-600 font-bold">{broadcastStatus}</p>}
+                                {broadcastStatus && <p className={"text-sm font-bold " + (broadcastStatus.includes('Failed') ? 'text-red-600' : 'text-green-600')}>{broadcastStatus}</p>}
                                 <div className="flex gap-2 mt-2">
                                     <button 
                                         onClick={sendAlert}
@@ -173,7 +184,7 @@ function App() {
                                 <div className="bg-surface-container-lowest border border-outline-variant rounded-lg p-3 flex items-center justify-between hover:bg-surface-container-low transition-colors cursor-pointer">
                                     <div className="flex items-center gap-3">
                                         <div className="w-2 h-2 rounded-full bg-error"></div>
-                                        <span className="font-label-lg text-label-lg">Sector 7G</span>
+                                        <span className="font-label-lg text-label-lg">Shaniwar Wada Main Gate</span>
                                     </div>
                                     <div className="flex items-center gap-4">
                                         <div className="w-24 bg-surface-container-high h-1.5 rounded-full overflow-hidden">
