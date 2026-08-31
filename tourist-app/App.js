@@ -12,10 +12,70 @@ if (Platform.OS === 'web') {
   document.head.appendChild(style);
 }
 
+import * as Location from 'expo-location';
+
+const CITY_CONFIG = {
+  pune: {
+    name: "Pune",
+    center: [73.8553, 18.5195],
+    zoom: 14,
+    places: ['Shaniwar Wada', 'Aga Khan Palace', 'Pataleshwar Caves', 'Dagdusheth Ganpati', 'Sinhagad Fort', 'Lal Mahal'],
+    coords: {
+      'Shaniwar Wada': [73.8553, 18.5195],
+      'Aga Khan Palace': [73.9015, 18.5523],
+      'Pataleshwar Caves': [73.8500, 18.5266],
+      'Dagdusheth Ganpati': [73.8560, 18.5163],
+      'Sinhagad Fort': [73.7558, 18.3664],
+      'Lal Mahal': [73.8568, 18.5148]
+    },
+    heatmapSites: [[73.8553, 18.5195], [73.8500, 18.5266], [73.9015, 18.5523], [73.8560, 18.5163], [73.8568, 18.5148]],
+    activityName: "Shaniwar Wada Heritage Walk",
+    rushSite: "Dagdusheth Temple",
+    trailName: "Peshwa Heritage Trail"
+  },
+  delhi: {
+    name: "Delhi",
+    center: [77.2273, 28.6129],
+    zoom: 12,
+    places: ['Red Fort', 'Qutub Minar', 'India Gate', 'Humayun Tomb', 'Lotus Temple', 'Jama Masjid'],
+    coords: {
+      'Red Fort': [77.2410, 28.6562],
+      'Qutub Minar': [77.1855, 28.5245],
+      'India Gate': [77.2295, 28.6129],
+      'Humayun Tomb': [77.2507, 28.5933],
+      'Lotus Temple': [77.2588, 28.5535],
+      'Jama Masjid': [77.2334, 28.6507]
+    },
+    heatmapSites: [[77.2410, 28.6562], [77.1855, 28.5245], [77.2295, 28.6129], [77.2507, 28.5933], [77.2588, 28.5535]],
+    activityName: "Mughal Heritage Walk",
+    rushSite: "Red Fort",
+    trailName: "Sultanate Trail"
+  },
+  mumbai: {
+    name: "Mumbai",
+    center: [72.8347, 18.9220],
+    zoom: 13,
+    places: ['Gateway of India', 'Elephanta Caves', 'CSMT', 'Marine Drive', 'Haji Ali Dargah', 'Global Vipassana'],
+    coords: {
+      'Gateway of India': [72.8347, 18.9220],
+      'Elephanta Caves': [72.9315, 18.9633],
+      'CSMT': [72.8347, 18.9398],
+      'Marine Drive': [72.8258, 18.9440],
+      'Haji Ali Dargah': [72.8088, 18.9827],
+      'Global Vipassana': [72.8060, 19.2284]
+    },
+    heatmapSites: [[72.8347, 18.9220], [72.9315, 18.9633], [72.8347, 18.9398], [72.8258, 18.9440], [72.8088, 18.9827]],
+    activityName: "Colaba Heritage Walk",
+    rushSite: "Gateway of India",
+    trailName: "Bombay Deco Trail"
+  }
+};
+
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiY2hhaXRhbnlhbW9yZSIsImEiOiJjbXQ5dmRyYjgwNHhuMnlzMXRiNzI5Z2JxIn0.ZuMDWt7m5FkbIJNVcdm7MA';
 
 export default function App() {
   const [session, setSession] = useState(null);
+  const [cityKey, setCityKey] = useState('pune');
   
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -25,16 +85,41 @@ export default function App() {
     supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
+
+    (async () => {
+      if (Platform.OS === 'web') return; // For hackathon demo, mock web or skip
+      try {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') return;
+        let loc = await Location.getCurrentPositionAsync({});
+        let lat = loc.coords.latitude;
+        let lon = loc.coords.longitude;
+        
+        let closest = 'pune';
+        let minDist = Infinity;
+        for (const [key, city] of Object.entries(CITY_CONFIG)) {
+          // simple squared distance
+          const dist = Math.pow(city.center[1] - lat, 2) + Math.pow(city.center[0] - lon, 2);
+          if (dist < minDist) {
+            minDist = dist;
+            closest = key;
+          }
+        }
+        setCityKey(closest);
+      } catch (e) {
+        console.log('Location fetch failed, defaulting to Pune', e);
+      }
+    })();
   }, []);
 
   if (!session) {
-    return <AuthScreen setSession={setSession} />;
+    return <AuthScreen setSession={setSession} cityData={CITY_CONFIG[cityKey]} />;
   }
 
-  return <MainApp session={session} />;
+  return <MainApp session={session} cityData={CITY_CONFIG[cityKey]} />;
 }
 
-function AuthScreen({ setSession }) {
+function AuthScreen({ setSession, cityData }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -71,7 +156,7 @@ function AuthScreen({ setSession }) {
                     <MaterialIcons name="explore" size={36} color="#0a1628" />
                 </View>
                 <Text style={{fontSize: 36, fontWeight: '800', color: '#ffffff', letterSpacing: -1}}>FlowScape</Text>
-                <Text style={{fontSize: 15, color: '#8b9cc7', textAlign: 'center', marginTop: 8, lineHeight: 22}}>Live Heatmaps & Gamified Smart Routing{'\n'}for Heritage Tourism in Pune</Text>
+                <Text style={{fontSize: 15, color: '#8b9cc7', textAlign: 'center', marginTop: 8, lineHeight: 22}}>Live Heatmaps & Gamified Smart Routing{'\n'}{cityData.subtitle}</Text>
             </View>
 
             {/* Feature Pills */}
@@ -133,7 +218,7 @@ function AuthScreen({ setSession }) {
   );
 }
 
-function MainApp({ session }) {
+function MainApp({ session, cityData }) {
   const [incentive, setIncentive] = useState('Checking density...');
   const [discount, setDiscount] = useState(0);
   const [activeTab, setActiveTab] = useState('Home');
@@ -162,26 +247,19 @@ function MainApp({ session }) {
   const [selectedLocation, setSelectedLocation] = useState('Detecting nearest location...');
   const [searchQuery, setSearchQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const searchPlaces = ['Shaniwar Wada', 'Aga Khan Palace', 'Pataleshwar Caves', 'Dagdusheth Ganpati', 'Sinhagad Fort', 'Lal Mahal'];
+  const searchPlaces = cityData.places;
   const filteredPlaces = searchPlaces.filter(place => place.toLowerCase().includes(searchQuery.toLowerCase()));
   
   const heatmapsWs = useRef(null);
   const alertsWs = useRef(null);
   const mapRef = useRef(null);
 
-  const placeCoordinates = {
-      'Shaniwar Wada': [73.8553, 18.5195],
-      'Aga Khan Palace': [73.9015, 18.5523],
-      'Pataleshwar Caves': [73.8500, 18.5266],
-      'Dagdusheth Ganpati': [73.8560, 18.5163],
-      'Sinhagad Fort': [73.7558, 18.3664],
-      'Lal Mahal': [73.8568, 18.5148]
-  };
+  const placeCoordinates = cityData.coords;
 
   useEffect(() => {
     // Simulate GPS Nearest Node Detection
     const gpsTimer = setTimeout(() => {
-        setSelectedLocation(prev => prev === 'Detecting nearest location...' ? 'Shaniwar Wada (Live Status)' : prev);
+        setSelectedLocation(prev => prev === 'Detecting nearest location...' ? `${cityData.places[0]} (Live Status)` : prev);
     }, 2000);
 
     const connectHeatmaps = () => {
@@ -193,14 +271,9 @@ function MainApp({ session }) {
             const updates = msg.data;
             const hasRedZone = updates.some(u => u.status === 'RED');
           
-            // Simulated Pune Tourist Sites Heatmap
-            const siteCoordinates = [
-              [73.8553, 18.5195], // Shaniwar Wada
-              [73.8500, 18.5266], // Pataleshwar
-              [73.9015, 18.5523], // Aga Khan Palace
-              [73.8430, 18.5080], // Saras Baug
-              [73.8640, 18.5230]  // Dagdusheth
-            ];
+            // Simulated Tourist Sites Heatmap based on City Context
+            const siteCoordinates = cityData.heatmapSites;
+            
             const geojson = {
               type: 'FeatureCollection',
               features: updates.slice(0, 5).map((u, i) => ({
@@ -425,7 +498,7 @@ function MainApp({ session }) {
                 >
                     <View style={styles.pathOverlay}>
                         <View style={styles.gemBadge}><Text style={styles.gemBadgeText}>Hidden Gem</Text></View>
-                        <Text style={styles.pathTitle}>Peshwa Heritage Trail</Text>
+                        <Text style={styles.pathTitle}>{cityData.trailName}</Text>
                         <View style={styles.densityBadge}><Text style={styles.densityBadgeText}>Low Crowd</Text></View>
                     </View>
                 </ImageBackground>
@@ -438,21 +511,18 @@ function MainApp({ session }) {
                 </View>
              </View>
 
-             <View style={styles.headerRow}>
-                 <Text style={styles.sectionTitle}>Rewards</Text>
-                 <Text style={styles.viewAllText}>View All</Text>
-             </View>
-
              <View style={styles.pointsCard}>
                  <Text style={styles.pointsLabel}>CURRENT BALANCE</Text>
                  <Text style={styles.pointsValue}>4,200 <Text style={styles.pointsUnit}>pts</Text></Text>
                  
                  <View style={styles.levelRow}>
-                     <Text style={styles.levelText}>Level 4 Explorer</Text>
-                     <Text style={styles.levelText}>3,000 pts</Text>
+                     <Text style={styles.levelText}>Heritage Explorer (Lv. 4)</Text>
+                     <Text style={styles.levelText}>800 to next</Text>
                  </View>
-                 <View style={styles.progressBarBg}><View style={[styles.progressBarFill, { width: '69%' }]} /></View>
-                 <Text style={styles.pointsHint}>550 pts to free museum entry</Text>
+                 <View style={styles.progressBarBg}>
+                     <View style={[styles.progressBarFill, {width: '60%'}]} />
+                 </View>
+                 <Text style={styles.pointsHint}>Earn more points by departing during green zones.</Text>
              </View>
           </View>
         )}
@@ -461,83 +531,70 @@ function MainApp({ session }) {
           <View style={styles.tabContent}>
              <View style={styles.profileHeader}>
                  <View style={styles.avatarContainer}>
-                     <View style={[styles.avatarImage, { backgroundColor: '#00497d', alignItems: 'center', justifyContent: 'center' }]}>
-                         <Text style={{ fontSize: 48, color: '#fff', fontWeight: 'bold' }}>
-                             {session?.user?.email ? session.user.email[0].toUpperCase() : 'A'}
-                         </Text>
-                     </View>
+                    <ImageBackground source={{uri: 'https://i.pravatar.cc/150?u=a042581f4e29026704d'}} style={styles.avatarImage} imageStyle={{borderRadius: 50}} />
                  </View>
-                 <Text style={styles.profileName}>{session?.user?.email || 'Explorer'}</Text>
-                 <View style={[styles.levelBadge, { backgroundColor: '#d1e4ff', marginTop: 4 }]}>
-                     <Text style={[styles.levelBadgeText, { color: '#00497d' }]}>✓ Email Verified</Text>
-                 </View>
-                 <View style={[styles.levelBadge, { marginTop: 8 }]}>
-                     <Text style={styles.levelBadgeText}>Level 4 Explorer</Text>
-                 </View>
+                 <Text style={styles.profileName}>Chaitanya</Text>
+                 <View style={styles.levelBadge}><Text style={styles.levelBadgeText}>Heritage Explorer</Text></View>
              </View>
 
              <View style={styles.statsGrid}>
                  <View style={styles.statBox}>
-                     <Text style={styles.statValue}>394</Text>
-                     <Text style={styles.statLabel}>TOTAL KM</Text>
-                 </View>
-                 <View style={styles.statBox}>
                      <Text style={styles.statValue}>12</Text>
-                     <Text style={styles.statLabel}>ROUTES SAVED</Text>
+                     <Text style={styles.statLabel}>Sites Visited</Text>
                  </View>
                  <View style={styles.statBox}>
-                     <Text style={styles.statValue}>4,200</Text>
-                     <Text style={styles.statLabel}>POINTS EARNED</Text>
+                     <Text style={styles.statValue}>4</Text>
+                     <Text style={styles.statLabel}>Badges</Text>
+                 </View>
+                 <View style={styles.statBox}>
+                     <Text style={styles.statValue}>$15</Text>
+                     <Text style={styles.statLabel}>Saved</Text>
                  </View>
              </View>
 
              <Text style={styles.sectionTitle}>Recent Activity</Text>
              <View style={styles.activityList}>
-                 <View style={styles.activityItem}>
-                     <View style={styles.activityInfo}>
-                         <Text style={styles.activityTitle}>Shaniwar Wada Heritage Walk</Text>
-                         <Text style={styles.activityMeta}>Today • 5.1 km</Text>
-                     </View>
-                     <View style={styles.activityPoints}>
-                         <Text style={styles.activitySaved}>Saved 15m</Text>
-                         <Text style={styles.activityScore}>+50 pts</Text>
-                     </View>
-                 </View>
+                   <View style={styles.activityItem}>
+                       <View style={styles.activityInfo}>
+                           <Text style={styles.activityTitle}>{cityData.activityName}</Text>
+                           <Text style={styles.activityMeta}>Today • 5.1 km</Text>
+                       </View>
+                       <View style={styles.activityPoints}>
+                           <Text style={styles.activitySaved}>Saved 12 mins</Text>
+                           <Text style={styles.activityScore}>+50 pts</Text>
+                       </View>
+                   </View>
              </View>
 
              <TouchableOpacity style={styles.logoutButton} onPress={() => supabase.auth.signOut()}>
-                 <Text style={styles.logoutText}>Log Out</Text>
+                 <Text style={styles.logoutText}>Sign Out</Text>
              </TouchableOpacity>
-
           </View>
         )}
 
         {activeTab === 'Notifications' && (
           <View style={styles.tabContent}>
-             <Text style={styles.sectionTitle}>Active Safety Alerts</Text>
-             {liveAlerts.length === 0 ? (
-                 <Text style={{color: '#414750', marginTop: 10}}>No active broadcasts from admin.</Text>
-             ) : (
-                 liveAlerts.map(alert => (
-                    <View key={alert.id} style={styles.alertCardRed}>
-                        <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: 8}}>
-                            <MaterialIcons name="warning" size={20} color="#93000a" style={{marginRight: 8}} />
-                            <Text style={styles.alertTitleRed}>Admin Broadcast</Text>
-                        </View>
-                        <Text style={styles.alertDescRed}>{alert.message}</Text>
-                        <Text style={styles.alertTime}>{alert.time}</Text>
-                    </View>
-                 ))
-             )}
+               <View style={styles.alertCardRed}>
+                  <Text style={styles.alertTitleRed}>⚠️ High Density Alert</Text>
+                  <Text style={styles.alertDescRed}>Sudden crowd surge at {cityData.rushSite}. Re-routing recommended for safety.</Text>
+                  <Text style={styles.alertTime}>Just now</Text>
+               </View>
 
-             <Text style={[styles.sectionTitle, {marginTop: 24}]}>Recent Notifications</Text>
-             <View style={styles.notificationCard}>
-                <View style={{flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4}}>
-                    <Text style={{fontWeight: 'bold', color: '#191c20', fontSize: 16}}>Reward Earned</Text>
-                    <Text style={{color: '#414750', fontSize: 12}}>1h ago</Text>
-                </View>
-                <Text style={{color: '#414750'}}>You earned 50 pts for avoiding the Dagdusheth Temple rush!</Text>
-             </View>
+               {liveAlerts.map(alert => (
+                 <View key={alert.id} style={styles.alertCardRed}>
+                    <Text style={styles.alertTitleRed}>⚠️ Emergency Broadcast</Text>
+                    <Text style={styles.alertDescRed}>{alert.message}</Text>
+                    <Text style={styles.alertTime}>{alert.time}</Text>
+                 </View>
+               ))}
+
+               <View style={styles.notificationCard}>
+                  <View style={{flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4}}>
+                      <Text style={{fontWeight: 'bold', color: '#191c20', fontSize: 16}}>Points Awarded</Text>
+                      <Text style={{color: '#414750', fontSize: 12}}>1h ago</Text>
+                  </View>
+                  <Text style={{color: '#414750'}}>You earned 50 pts for avoiding the {cityData.rushSite} rush!</Text>
+               </View>
           </View>
         )}
 
@@ -623,7 +680,7 @@ function MainApp({ session }) {
           <Map
             ref={mapRef}
             mapboxAccessToken={MAPBOX_TOKEN}
-            initialViewState={{ longitude: 73.8553, latitude: 18.5195, zoom: 13 }}
+            initialViewState={{ longitude: cityData.center[0], latitude: cityData.center[1], zoom: cityData.zoom }}
             style={{ width: '100%', height: '100%' }}
             mapStyle="mapbox://styles/mapbox/traffic-day-v2"
           >
