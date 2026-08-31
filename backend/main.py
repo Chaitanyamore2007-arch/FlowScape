@@ -58,8 +58,8 @@ def get_zones(venue_id: str):
     response = supabase.table("zones").select("*").eq("venue_id", venue_id).execute()
     return response.data
 
-@app.post("/bookings", response_model=Booking, summary="Create booking", description="Books a time slot and optionally sends WhatsApp confirmation via Twilio.")
-def create_booking(booking: BookingCreate, user_id: str = "mock-user-uuid"):
+@app.post("/bookings", summary="Create booking", description="Books a time slot and optionally sends WhatsApp confirmation via Twilio.")
+def create_booking(booking: BookingCreate, user_id: str = "anonymous"):
     data = {
         "user_id": user_id,
         "venue_id": str(booking.venue_id),
