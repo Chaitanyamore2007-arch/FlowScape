@@ -137,10 +137,12 @@ export default function App() {
     });
 
     (async () => {
-      if (Platform.OS === 'web') return; // For hackathon demo, mock web or skip
       try {
         let { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') return;
+        if (status !== 'granted') {
+           console.log('Location not granted');
+           return;
+        }
         let loc = await Location.getCurrentPositionAsync({});
         let lat = loc.coords.latitude;
         let lon = loc.coords.longitude;
@@ -305,13 +307,12 @@ function MainApp({ session, cityData }) {
   const mapRef = useRef(null);
 
   const placeCoordinates = cityData.coords;
+  
+  useEffect(() => {
+    setSelectedLocation(`${cityData.places[0]} (Live Status)`);
+  }, [cityData]);
 
   useEffect(() => {
-    // Simulate GPS Nearest Node Detection
-    const gpsTimer = setTimeout(() => {
-        setSelectedLocation(prev => prev === 'Detecting nearest location...' ? `${cityData.places[0]} (Live Status)` : prev);
-    }, 2000);
-
     const connectHeatmaps = () => {
       heatmapsWs.current = new WebSocket('wss://flowscape.onrender.com/ws/heatmaps');
       heatmapsWs.current.onmessage = (event) => {
@@ -728,6 +729,7 @@ function MainApp({ session, cityData }) {
           </View>
 
           <Map
+            key={cityData.name}
             ref={mapRef}
             mapboxAccessToken={MAPBOX_TOKEN}
             initialViewState={{ longitude: cityData.center[0], latitude: cityData.center[1], zoom: cityData.zoom }}
