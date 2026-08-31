@@ -33,24 +33,6 @@ const CITY_CONFIG = {
     rushSite: "Dagdusheth Temple",
     trailName: "Peshwa Heritage Trail"
   },
-  delhi: {
-    name: "Delhi",
-    center: [77.2273, 28.6129],
-    zoom: 12,
-    places: ['Red Fort', 'Qutub Minar', 'India Gate', 'Humayun Tomb', 'Lotus Temple', 'Jama Masjid'],
-    coords: {
-      'Red Fort': [77.2410, 28.6562],
-      'Qutub Minar': [77.1855, 28.5245],
-      'India Gate': [77.2295, 28.6129],
-      'Humayun Tomb': [77.2507, 28.5933],
-      'Lotus Temple': [77.2588, 28.5535],
-      'Jama Masjid': [77.2334, 28.6507]
-    },
-    heatmapSites: [[77.2410, 28.6562], [77.1855, 28.5245], [77.2295, 28.6129], [77.2507, 28.5933], [77.2588, 28.5535]],
-    activityName: "Mughal Heritage Walk",
-    rushSite: "Red Fort",
-    trailName: "Sultanate Trail"
-  },
   mumbai: {
     name: "Mumbai",
     center: [72.8347, 18.9220],
@@ -68,6 +50,74 @@ const CITY_CONFIG = {
     activityName: "Colaba Heritage Walk",
     rushSite: "Gateway of India",
     trailName: "Bombay Deco Trail"
+  },
+  aurangabad: {
+    name: "Aurangabad",
+    center: [75.3236, 19.8762],
+    zoom: 12,
+    places: ['Ajanta Caves', 'Ellora Caves', 'Bibi Ka Maqbara', 'Daulatabad Fort', 'Grishneshwar Temple'],
+    coords: {
+      'Ajanta Caves': [75.7033, 20.5519],
+      'Ellora Caves': [75.1776, 20.0258],
+      'Bibi Ka Maqbara': [75.3204, 19.8943],
+      'Daulatabad Fort': [75.2152, 19.9480],
+      'Grishneshwar Temple': [75.1706, 20.0245]
+    },
+    heatmapSites: [[75.7033, 20.5519], [75.1776, 20.0258], [75.3204, 19.8943], [75.2152, 19.9480], [75.1706, 20.0245]],
+    activityName: "Ellora Heritage Walk",
+    rushSite: "Ajanta Caves",
+    trailName: "Deccan History Trail"
+  },
+  nashik: {
+    name: "Nashik",
+    center: [73.7898, 19.9975],
+    zoom: 13,
+    places: ['Trimbakeshwar Temple', 'Pandavleni Caves', 'Sita Gufa', 'Muktidham', 'Kalaram Temple'],
+    coords: {
+      'Trimbakeshwar Temple': [73.5303, 19.9324],
+      'Pandavleni Caves': [73.7468, 19.9576],
+      'Sita Gufa': [73.7915, 20.0075],
+      'Muktidham': [73.8242, 19.9803],
+      'Kalaram Temple': [73.7925, 20.0080]
+    },
+    heatmapSites: [[73.5303, 19.9324], [73.7468, 19.9576], [73.7915, 20.0075], [73.8242, 19.9803], [73.7925, 20.0080]],
+    activityName: "Godavari Ghat Walk",
+    rushSite: "Trimbakeshwar Temple",
+    trailName: "Ancient Nashik Trail"
+  },
+  nagpur: {
+    name: "Nagpur",
+    center: [79.0882, 21.1458],
+    zoom: 13,
+    places: ['Deekshabhoomi', 'Sitabuldi Fort', 'Ambazari Lake', 'Zero Mile Stone', 'Raman Science Centre'],
+    coords: {
+      'Deekshabhoomi': [79.0573, 21.1278],
+      'Sitabuldi Fort': [79.0874, 21.1437],
+      'Ambazari Lake': [79.0264, 21.1235],
+      'Zero Mile Stone': [79.0864, 21.1444],
+      'Raman Science Centre': [79.0987, 21.1415]
+    },
+    heatmapSites: [[79.0573, 21.1278], [79.0874, 21.1437], [79.0264, 21.1235], [79.0864, 21.1444], [79.0987, 21.1415]],
+    activityName: "Zero Mile Heritage Walk",
+    rushSite: "Deekshabhoomi",
+    trailName: "Orange City Trail"
+  },
+  kolhapur: {
+    name: "Kolhapur",
+    center: [74.2433, 16.7050],
+    zoom: 13,
+    places: ['Mahalakshmi Temple', 'Panhala Fort', 'New Palace', 'Rankala Lake', 'Jyotiba Temple'],
+    coords: {
+      'Mahalakshmi Temple': [74.2272, 16.6946],
+      'Panhala Fort': [74.1130, 16.8159],
+      'New Palace': [74.2384, 16.7202],
+      'Rankala Lake': [74.2120, 16.6908],
+      'Jyotiba Temple': [74.1751, 16.8049]
+    },
+    heatmapSites: [[74.2272, 16.6946], [74.1130, 16.8159], [74.2384, 16.7202], [74.2120, 16.6908], [74.1751, 16.8049]],
+    activityName: "Mahalakshmi Temple Walk",
+    rushSite: "Mahalakshmi Temple",
+    trailName: "Maratha Heritage Trail"
   }
 };
 
