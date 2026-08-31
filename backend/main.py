@@ -79,7 +79,7 @@ def create_booking(booking: BookingCreate, user_id: str = "mock-user-uuid"):
             client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
             # Format time for display
             time_display = booking.start_time.strftime("%I:%M %p")
-            msg = f"FlowScape: Your slot at Shaniwar Wada is confirmed for {time_display}. Current capacity: 22% (Low). Earn 50 bonus points for early arrival! 🏛️"
+            msg = f"FlowScape: Your slot at Shaniwar Wada is confirmed for {time_display}. Current capacity: 22% (Low). Earn 50 bonus points for early arrival!"
             client.messages.create(
                 from_=TWILIO_WHATSAPP_NUMBER,
                 body=msg,
